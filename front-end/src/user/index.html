@@ -10,8 +10,185 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
       rel="stylesheet"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
   </head>
   <body>
-    <h1 class="text-3xl font-bold underline">Hello world!</h1>
+    <header class="border-b border-gray-200 bg-white">
+      <div class="container mx-auto px-6">
+        <div class="flex items-center justify-between h-16">
+          <a href="./" class="text-xl font-bold text-black tracking-wide">
+            CLOTHES SHOP
+          </a>
+
+          <nav class="hidden md:flex gap-8 text-black font-medium">
+            <a href="#" class="hover:opacity-70 transition">Trang chủ</a>
+
+            <div class="relative">
+              <button
+                id="dropdownBtn"
+                class="flex items-center gap-1 hover:opacity-70 transition"
+              >
+                Danh mục
+                <i
+                  id="dropdownIcon"
+                  class="fa-solid fa-chevron-down text-xs transition-transform"
+                ></i>
+              </button>
+
+              <div
+                id="dropdownMenu"
+                class="absolute left-0 mt-3 w-44 bg-white border border-gray-200 rounded-md shadow-lg hidden z-50"
+              ></div>
+            </div>
+          </nav>
+
+          <div class="flex items-center gap-6 text-black">
+            <form class="relative hidden md:block">
+              <input
+                type="text"
+                placeholder="Tìm kiếm"
+                class="w-72 border border-gray-300 rounded-full pl-12 pr-5 py-2.5 text-base focus:outline-none focus:border-black transition"
+              />
+              <i
+                class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm"
+              ></i>
+            </form>
+
+            <a href="#" class="hover:opacity-70 transition">
+              <i class="fa-regular fa-user"></i>
+            </a>
+
+            <a href="#" class="relative hover:opacity-70 transition">
+              <i class="fa-solid fa-cart-shopping"></i>
+              <span
+                class="absolute -top-2 -right-2 bg-black text-white text-xs w-4 h-4 rounded-full flex items-center justify-center"
+              >
+                2
+              </span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="overflow-hidden mt-2 rounded-xl">
+        <img
+          class="w-full h-full object-cover"
+          src="../image/banner (2).png"
+          alt="banner"
+        />
+      </section>
+
+      <div>
+        <div class="container mx-auto px-6 py-10 space-y-14">
+          <section>
+            <h2 class="text-2xl font-semibold mb-6">Sản phẩm mới</h2>
+            <div
+              id="newProduct"
+              class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6"
+            ></div>
+          </section>
+          <section>
+            <h2 class="text-2xl font-semibold mb-6">Sản phẩm bán chạy</h2>
+            <div
+              id="bestSellerProducts"
+              class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6"
+            ></div>
+          </section>
+        </div>
+      </div>
+    </main>
+    <footer>
+      <p class="text-center text-base p-4">Thuộc quyền sở hửu bởi DCT123C1!</p>
+    </footer>
+
+    <script>
+      const btn = document.getElementById("dropdownBtn");
+      const menu = document.getElementById("dropdownMenu");
+      const icon = document.getElementById("dropdownIcon");
+
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        menu.classList.toggle("hidden");
+        icon.classList.toggle("rotate-180");
+      });
+
+      document.addEventListener("click", () => {
+        menu.classList.add("hidden");
+        icon.classList.remove("rotate-180");
+      });
+    </script>
+
+    <script src="../api/product.js"></script>
+    <script src="../api/category.js"></script>
+    <script>
+      function renderCategory(list, elementId) {
+        const container = document.getElementById(elementId);
+        container.innerHTML = "";
+        list.forEach((category) => {
+          container.innerHTML += ` <a
+                  href="#"
+                  class="block px-4 py-2 hover:bg-black hover:text-white transition"
+                >
+                  ${category.name}
+                </a>`;
+        });
+      }
+      function renderProduct(list, elementId) {
+        const container = document.getElementById(elementId);
+        container.innerHTML = "";
+
+        if (!list || list.length === 0) {
+          container.innerHTML = "<p>Đang cập nhật sản phẩm...</p>";
+          return;
+        }
+
+        list.forEach((product) => {
+          const minPrice = Math.min(
+            ...product.variants.flatMap((v) => v.sizes.map((s) => s.price)),
+          );
+
+          container.innerHTML += `
+           <div class="border rounded-xl overflow-hidden hover:shadow-lg transition flex flex-col h-full">
+          <div class="relative w-full h-80 bg-gray-100">
+             <img
+                src="${product.image}"
+                alt="${product.name}"
+                class="w-full h-full object-contain mix-blend-multiply"
+              />
+          </div>
+          <div class="p-4 space-y-2 flex flex-col flex-1">
+            <h3 class="font-medium text-lg line-clamp-1">${product.name}</h3>
+            <p class="text-sm text-gray-500">
+               Đã bán ${product.sold >= 1000 ? (product.sold / 1000).toFixed(1) + "k" : product.sold}
+            </p>
+            <p class="font-semibold text-black text-lg">
+              ${minPrice.toLocaleString()}đ
+            </p>
+            <button
+              class="w-full mt-auto border border-black py-2 rounded-full hover:bg-black hover:text-white transition font-medium"
+            >
+              Xem chi tiết
+            </button>
+          </div>
+        </div>
+          `;
+        });
+      }
+
+      const newProductList = products.filter((p) => p.isNew);
+
+      const bestSellerList = [...products]
+        .sort((a, b) => b.sold - a.sold)
+        .slice(0, 4);
+
+      renderProduct(newProductList, "newProduct");
+      renderProduct(bestSellerList, "bestSellerProducts");
+      renderCategory(categories, "dropdownMenu");
+    </script>
   </body>
 </html>
