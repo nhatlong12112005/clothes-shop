@@ -1,0 +1,67 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kết quả tìm kiếm - Clothes Shop</title>
+    <link href="../output.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  </head>
+  <body>
+    <header class="border-b border-gray-200 bg-white" id="mainHeader"></header>
+
+    <main class="min-h-screen bg-gray-50">
+      <div class="container mx-auto px-6 py-10">
+        <!-- Tiêu đề tìm kiếm -->
+        <div class="mb-8 border-b pb-4">
+          <h1 class="text-3xl font-bold text-gray-900">
+            Kết quả tìm kiếm cho: <span id="searchKeyword" class="text-blue-600">"..."</span>
+          </h1>
+          <p class="text-gray-500 mt-2">Tìm thấy <span id="searchCount" class="font-bold text-black">0</span> sản phẩm</p>
+        </div>
+
+        <!-- Kết quả sản phẩm -->
+        <div id="searchResults" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="col-span-4 text-center py-20 text-gray-500">
+            <i class="fa-solid fa-spinner fa-spin text-3xl mb-4"></i>
+            <p>Đang tìm kiếm dữ liệu...</p>
+          </div>
+        </div>
+
+        <!-- Phân trang -->
+        <div id="paginationContainer" class="flex justify-center mt-10 gap-2"></div>
+
+      </div>
+    </main>
+
+    <footer class="bg-white border-t mt-12">
+      <p class="text-center text-gray-600 text-sm p-6">Thuộc quyền sở hữu bởi DCT123C1!</p>
+    </footer>
+
+    <!-- Load Header Component (Inline Fetch or external script) -->
+    <script>
+      fetch('./components/header.html')
+        .then(response => {
+          if (!response.ok) throw new Error('Network response was not ok');
+          return response.text();
+        })
+        .then(data => {
+          document.getElementById('mainHeader').innerHTML = data;
+        })
+        .catch(() => {
+          // Fallback if component missing, fetch index header structure
+          fetch('./index.html')
+            .then(res => res.text())
+            .then(html => {
+              const doc = new DOMParser().parseFromString(html, 'text/html');
+              const headerHTML = doc.querySelector('header').innerHTML;
+              document.getElementById('mainHeader').innerHTML = headerHTML;
+            });
+        });
+    </script>
+    <script type="module" src="./search.js"></script>
+  </body>
+</html>

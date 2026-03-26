@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Đặt hàng thành công - Clothes Shop</title>
+    <link href="../output.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  </head>
+  <body class="bg-gray-50 text-gray-800">
+    <header class="border-b border-gray-200 bg-white sticky top-0 z-50">
+      <div class="container mx-auto px-6">
+        <div class="flex items-center justify-between h-16">
+          <a href="./index.html" class="text-xl font-bold text-black tracking-wide">CLOTHES SHOP</a>
+          <nav class="flex gap-6 text-black font-medium">
+            <a href="./index.html" class="hover:opacity-70 transition">Trang chủ</a>
+            <a href="./orders.html" class="hover:opacity-70 transition">Đơn hàng của tôi</a>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-16 min-h-screen flex justify-center">
+      <div class="w-full max-w-2xl">
+        <!-- Success Banner -->
+        <div class="text-center mb-10">
+          <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fa-solid fa-circle-check text-green-500 text-4xl"></i>
+          </div>
+          <h1 class="text-3xl font-bold text-gray-900 mb-2">Đặt hàng thành công!</h1>
+          <p class="text-gray-500">Cảm ơn bạn đã mua hàng. Chúng tôi sẽ liên hệ xác nhận sớm nhất.</p>
+          <p class="text-sm text-gray-400 mt-1">Mã đơn hàng: <span id="displayOrderId" class="font-bold text-black">#...</span></p>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6" id="orderSummaryCard">
+          <h2 class="text-lg font-bold mb-4 border-b pb-3">Tóm tắt đơn hàng</h2>
+
+          <!-- Shipping Info -->
+          <div class="mb-4">
+            <h3 class="font-semibold text-gray-700 mb-2">📦 Thông tin giao hàng</h3>
+            <div class="bg-gray-50 rounded-lg p-3 text-sm space-y-1" id="shippingInfoBlock">
+              <p><b>Người nhận:</b> <span id="oShipName">—</span></p>
+              <p><b>Số điện thoại:</b> <span id="oShipPhone">—</span></p>
+              <p><b>Địa chỉ:</b> <span id="oShipAddress">—</span></p>
+            </div>
+          </div>
+
+          <!-- Payment method -->
+          <div class="mb-4">
+            <h3 class="font-semibold text-gray-700 mb-2">💳 Phương thức thanh toán</h3>
+            <p id="oPaymentMethod" class="text-sm bg-gray-50 rounded-lg p-3">—</p>
+          </div>
+
+          <!-- Bank info (if transfer) -->
+          <div id="successBankInfo" class="hidden mb-4 border border-blue-200 bg-blue-50 rounded-xl p-4 text-sm space-y-1">
+            <p class="font-bold text-blue-800 mb-2">📋 Thông tin chuyển khoản</p>
+            <p><b>Ngân hàng:</b> Vietcombank</p>
+            <p><b>Số tài khoản:</b> 1234 5678 9012</p>
+            <p><b>Chủ tài khoản:</b> CLOTHES SHOP CO., LTD</p>
+            <p><b>Nội dung:</b> [Họ tên] - [SĐT] - Thanh toán đơn hàng <span id="successOrderIdBankRef"></span></p>
+            <p class="text-yellow-700 font-semibold mt-2">⚠️ Vui lòng chuyển khoản trong vòng 24h để đơn hàng được xử lý.</p>
+          </div>
+
+          <!-- Items List -->
+          <div>
+            <h3 class="font-semibold text-gray-700 mb-2">🛍️ Sản phẩm đã đặt</h3>
+            <div id="orderItemsList" class="space-y-3">
+              <p class="text-sm text-gray-400">Đang tải...</p>
+            </div>
+          </div>
+
+          <!-- Total -->
+          <div class="border-t pt-4 mt-4 flex justify-between items-center">
+            <span class="font-bold text-lg">Tổng cộng</span>
+            <span id="oTotal" class="text-2xl font-bold text-red-600">—</span>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex gap-4 justify-center">
+          <a href="./orders.html" class="bg-black text-white font-bold py-3 px-8 rounded-xl hover:opacity-80 transition">
+            <i class="fa-solid fa-list mr-2"></i>Xem đơn hàng của tôi
+          </a>
+          <a href="./index.html" class="border border-black text-black font-bold py-3 px-8 rounded-xl hover:bg-gray-100 transition">
+            <i class="fa-solid fa-store mr-2"></i>Tiếp tục mua sắm
+          </a>
+        </div>
+      </div>
+    </main>
+
+    <script type="module" src="./order_success.js"></script>
+  </body>
+</html>

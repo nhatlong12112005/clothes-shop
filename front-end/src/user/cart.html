@@ -1,0 +1,114 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Giỏ hàng - Clothes Shop</title>
+    <link href="../output.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+  </head>
+
+  <body class="bg-gray-50 text-gray-800">
+    <!-- Header -->
+    <header class="border-b border-gray-200 bg-white sticky top-0 z-50">
+      <!-- (Sẽ chèn lại nguyên trạng block header bên index sang) -->
+      <div class="container mx-auto px-6">
+        <div class="flex items-center justify-between h-16">
+          <a href="./index.html" class="text-xl font-bold text-black tracking-wide">
+            CLOTHES SHOP
+          </a>
+
+          <nav class="hidden md:flex gap-8 text-black font-medium">
+            <a href="./index.html" class="hover:opacity-70 transition">Trang chủ</a>
+
+            <div class="relative">
+              <button
+                id="dropdownBtn"
+                class="flex items-center gap-1 hover:opacity-70 transition"
+              >
+                Danh mục
+                <i id="dropdownIcon" class="fa-solid fa-chevron-down text-xs transition-transform"></i>
+              </button>
+              <div
+                id="dropdownMenu"
+                class="absolute left-0 mt-3 w-44 bg-white border border-gray-200 rounded-md shadow-lg hidden z-50"
+              ></div>
+            </div>
+          </nav>
+
+          <div class="flex items-center gap-6 text-black">
+            <div class="relative">
+              <button
+                id="userBtn"
+                class="hover:opacity-70 transition flex items-center gap-2"
+              >
+                <i class="fa-regular fa-user"></i>
+                <span id="username"></span>
+              </button>
+
+              <div
+                id="userMenu"
+                class="absolute right-0 mt-3 w-48 bg-white border border-gray-200 rounded-md shadow-lg hidden z-50"
+              >
+                <a href="./account/profile.html" class="block px-4 py-2 hover:bg-gray-100">Thông tin tài khoản</a>
+                <a href="./orders.html" class="block px-4 py-2 hover:bg-gray-100">Lịch sử mua hàng</a>
+                <a id="adminLink" href="../admin/index.html" class="block px-4 py-2 hover:bg-gray-100 hidden">MyAdmin</a>
+                <button onclick="logout()" class="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500">Đăng xuất</button>
+              </div>
+            </div>
+
+            <a href="./cart.html" class="relative hover:opacity-70 transition cursor-default pointer-events-none">
+              <i class="fa-solid fa-cart-shopping"></i>
+              <span id="cartBadgeCount" class="absolute -top-2 -right-2 bg-black text-white text-xs w-4 h-4 rounded-full flex items-center justify-center hidden">
+                0
+              </span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-10 min-h-screen">
+      <h1 class="text-3xl font-bold mb-8">Giỏ hàng của bạn</h1>
+
+      <div class="flex flex-col lg:flex-row gap-10">
+        <!-- Main Cart List -->
+        <div class="flex-1 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <div id="cartItemsContainer" class="space-y-6">
+            <p class="text-gray-500 text-center py-10">Đang tải giỏ hàng...</p>
+          </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="w-full lg:w-96 bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-fit">
+          <h2 class="text-xl font-bold mb-6">Tóm tắt đơn hàng</h2>
+          
+          <div class="flex justify-between mb-4 text-gray-600 border-b pb-4">
+            <span>Tạm tính (<span id="summaryTotalItems">0</span> sản phẩm)</span>
+            <span id="summarySubtotal" class="font-medium text-black">0đ</span>
+          </div>
+
+          <div class="flex justify-between mb-6 font-bold text-lg">
+            <span>Tổng cộng</span>
+            <span id="summaryTotal" class="text-red-600">0đ</span>
+          </div>
+
+          <button id="btnProceedCheckout" class="w-full bg-black text-white font-bold py-4 rounded-xl hover:opacity-80 transition disabled:opacity-50">
+            Tiến hành đặt hàng
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <script type="module" src="./cart.js"></script>
+  </body>
+</html>

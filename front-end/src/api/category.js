@@ -1,48 +1,45 @@
-const categories = [
-  {
-    id: 1,
-    name: "Áo Nam/Nữ",
-    slug: "ao", // dùng để làm link trên thanh địa chỉ
-    image: "../image/cate-ao.jpg", // Ảnh đại diện cho danh mục nếu cần
-    subCategories: [
-      "Áo Thun",
-      "Áo Polo",
-      "Áo Sơ Mi",
-      "Áo Khoác / Hoodie",
-      "Áo Len",
-    ],
-  },
-  {
-    id: 2,
-    name: "Quần Thời Trang",
-    slug: "quan",
-    image: "../image/cate-quan.jpg",
-    subCategories: [
-      "Quần Jean",
-      "Quần Tây",
-      "Quần Kaki",
-      "Quần Short",
-      "Quần Jogger",
-    ],
-  },
-  {
-    id: 3,
-    name: "Giày & Dép",
-    slug: "giay",
-    image: "../image/cate-giay.jpg",
-    subCategories: [
-      "Sneaker / Giày Thể Thao",
-      "Giày Tây",
-      "Boots",
-      "Sandal",
-      "Dép Slide",
-    ],
-  },
-  {
-    id: 4,
-    name: "Phụ Kiện Khác",
-    slug: "phu-kien",
-    image: "../image/cate-pk.jpg",
-    subCategories: ["Mũ / Nón", "Túi / Balo", "Thắt Lưng", "Tất / Vớ"],
-  },
-];
+import { fetchAPI } from './config.js';
+
+export async function getCategories() {
+  try {
+    const res = await fetchAPI('/category/getCate.php');
+    return res;
+  } catch(e) {
+    console.error("Lỗi lấy danh mục:", e);
+    throw e;
+  }
+}
+
+export async function loadCategories() {
+  try {
+    const res = await fetchAPI('/category/getCate.php');
+    if (res.status && res.data) {
+      return Array.isArray(res.data) ? res.data : (res.data.data || []);
+    }
+  } catch(e) {
+    console.error("Lỗi lấy danh mục:", e);
+  }
+  return [];
+}
+
+export function renderCategory(list, elementId) {
+  const container = document.getElementById(elementId);
+  if (!container) return;
+  container.innerHTML = "";
+  
+  if (!list || list.length === 0) {
+    container.innerHTML = `<p class="px-4 py-2 text-gray-500">Chưa có danh mục</p>`;
+    return;
+  }
+
+  list.forEach((category) => {
+    container.innerHTML += `
+      <a
+        href="./products.html?cate=${category.slug || category.id}"
+        class="block px-4 py-2 hover:bg-black hover:text-white transition"
+      >
+        ${category.name}
+      </a>
+    `;
+  });
+}

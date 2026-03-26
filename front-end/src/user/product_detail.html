@@ -1,0 +1,177 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chi tiết sản phẩm - Clothes Shop</title>
+    <link href="../output.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+  </head>
+
+  <body class="bg-gray-50 text-gray-800">
+    <!-- Header -->
+    <header class="border-b border-gray-200 bg-white sticky top-0 z-50">
+      <div class="container mx-auto px-6">
+        <div class="flex items-center justify-between h-16">
+          <a href="./index.html" class="text-xl font-bold text-black tracking-wide">
+            CLOTHES SHOP
+          </a>
+
+          <nav class="hidden md:flex gap-8 text-black font-medium">
+            <a href="./index.html" class="hover:opacity-70 transition">Trang chủ</a>
+
+            <div class="relative">
+              <button
+                id="dropdownBtn"
+                class="flex items-center gap-1 hover:opacity-70 transition"
+              >
+                Danh mục
+                <i id="dropdownIcon" class="fa-solid fa-chevron-down text-xs transition-transform"></i>
+              </button>
+              <div
+                id="dropdownMenu"
+                class="absolute left-0 mt-3 w-44 bg-white border border-gray-200 rounded-md shadow-lg hidden z-50"
+              ></div>
+            </div>
+          </nav>
+
+          <div class="flex items-center gap-6 text-black">
+            <div class="relative">
+              <button
+                id="userBtn"
+                class="hover:opacity-70 transition flex items-center gap-2"
+              >
+                <i class="fa-regular fa-user"></i>
+                <span id="username"></span>
+              </button>
+
+              <div
+                id="userMenu"
+                class="absolute right-0 mt-3 w-48 bg-white border border-gray-200 rounded-md shadow-lg hidden z-50"
+              >
+                <a href="./account/profile.html" class="block px-4 py-2 hover:bg-gray-100">Thông tin tài khoản</a>
+                <a href="./orders.html" class="block px-4 py-2 hover:bg-gray-100">Lịch sử mua hàng</a>
+                <a id="adminLink" href="../admin/index.html" class="block px-4 py-2 hover:bg-gray-100 hidden">MyAdmin</a>
+                <button onclick="logout()" class="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-500">Đăng xuất</button>
+              </div>
+            </div>
+
+            <a href="./cart.html" class="relative hover:opacity-70 transition">
+              <i class="fa-solid fa-cart-shopping"></i>
+              <span id="cartBadgeCount" class="absolute -top-2 -right-2 bg-black text-white text-xs w-4 h-4 rounded-full flex items-center justify-center hidden">
+                0
+              </span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="container mx-auto px-6 py-10 pt-16 min-h-screen">
+      <!-- Breadcrumb -->
+      <nav class="text-sm mb-6 text-gray-500">
+        <a href="index.html" class="hover:text-black hover:underline">Trang chủ</a>
+        <span class="mx-2">/</span>
+        <a href="#" id="breadCategory" class="hover:text-black hover:underline">Sản phẩm</a>
+        <span class="mx-2">/</span>
+        <span id="breadCurrent" class="text-gray-800 font-medium">Đang tải...</span>
+      </nav>
+
+      <div class="flex flex-col md:flex-row gap-10 bg-white p-6 md:p-10 rounded-2xl shadow-sm border border-gray-100">
+        <!-- Ảnh -->
+        <div class="md:w-1/2 flex flex-col gap-4">
+          <div class="flex justify-center items-center bg-gray-50 rounded-xl overflow-hidden p-8 border">
+            <img
+              id="productImage"
+              src=""
+              alt="Product Image"
+              class="max-w-full max-h-[450px] object-contain mix-blend-multiply"
+            />
+          </div>
+          <!-- Thumbnails -->
+          <div id="productThumbnails" class="flex gap-4 overflow-x-auto pb-2 shrink-0">
+            <!-- Thumbs dynamically inserted -->
+          </div>
+        </div>
+
+        <!-- Thông tin chi tiết -->
+        <div class="md:w-1/2">
+          <h1 id="productName" class="text-3xl font-bold mb-2">Đang tải...</h1>
+          
+          <div class="flex items-center gap-4 mb-4 text-sm">
+            <span class="text-gray-500">Thương hiệu: <span id="productBrand" class="font-medium text-black">N/A</span></span>
+            <span class="text-gray-300">|</span>
+            <span class="text-gray-500">Tồn kho: <span id="productStock" class="font-medium text-black">0</span></span>
+          </div>
+
+          <p id="productPrice" class="text-2xl font-bold text-red-600 mb-6">0đ</p>
+          
+          <div class="h-[1px] bg-gray-200 mb-6 w-full"></div>
+
+          <p id="productDesc" class="text-gray-600 mb-8 leading-relaxed whitespace-pre-wrap leading-7">
+            Đang tải thông tin chi tiết của sản phẩm...
+          </p>
+
+          <!-- Selection Form -->
+          <form id="addToCartForm" class="space-y-6">
+            <!-- Colors -->
+            <div>
+              <h3 class="font-semibold mb-3">Màu sắc:</h3>
+              <div id="colorOptions" class="flex flex-wrap gap-3">
+                <!-- Radio buttons will be inserted here -->
+                <p class="text-sm text-gray-500">Đang tải màu...</p>
+              </div>
+            </div>
+
+            <!-- Sizes -->
+            <div>
+              <h3 class="font-semibold mb-3 flex items-center justify-between">
+                Kích cỡ: 
+                <span id="priceDisplay" class="text-sm font-normal text-red-500 ml-auto"></span>
+              </h3>
+              <div id="sizeOptions" class="flex flex-wrap gap-3">
+                <!-- Size radio buttons -->
+                <p class="text-sm text-gray-500 text-sm">Vui lòng chọn Màu sắc trước.</p>
+              </div>
+            </div>
+
+            <div class="flex items-end gap-3 pt-4">
+              <div class="w-32">
+                <label class="block text-sm font-semibold mb-2 text-gray-700">Số lượng:</label>
+                <div class="flex border border-gray-300 rounded-lg overflow-hidden h-12">
+                  <button type="button" id="btnMinus" class="w-10 hover:bg-gray-100 transition focus:outline-none text-xl font-light">-</button>
+                  <input type="number" id="qtyInput" value="1" min="1" class="w-full text-center focus:outline-none bg-transparent">
+                  <button type="button" id="btnPlus" class="w-10 hover:bg-gray-100 transition focus:outline-none text-xl font-light">+</button>
+                </div>
+              </div>
+              <p id="stockStatus" class="text-sm text-gray-500 mb-2 ml-4"></p>
+            </div>
+
+            <div class="pt-6">
+              <button
+                type="submit"
+                id="btnAddToCart"
+                disabled
+                class="w-full bg-black text-white font-bold py-4 rounded-xl hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed transition flex justify-center items-center gap-2"
+              >
+                <i class="fa-solid fa-cart-append"></i> Thêm vào giỏ hàng
+              </button>
+            </div>
+          </form>
+
+        </div>
+      </div>
+    </main>
+
+    <script type="module" src="./product_detail.js"></script>
+  </body>
+</html>

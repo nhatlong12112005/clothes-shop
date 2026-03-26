@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+    />
+    <title>Đăng Nhập</title>
+  </head>
+
+  <body>
+    <header class="border-b border-gray-200 bg-white">
+      <div class="container mx-auto px-6">
+        <div class="flex items-center justify-between h-16">
+          <a href="./" class="text-xl font-bold text-black tracking-wide">
+            CLOTHES SHOP
+          </a>
+
+          <nav class="hidden md:flex gap-8 text-black font-medium">
+            <a href="../index.html" class="hover:opacity-70 transition"
+              >Trang chủ</a
+            >
+            <div class="relative">
+              <button
+                id="dropdownBtn"
+                class="flex items-center gap-1 hover:opacity-70 transition"
+              >
+                Danh mục
+                <i
+                  id="dropdownIcon"
+                  class="fa-solid fa-chevron-down text-xs transition-transform"
+                ></i>
+              </button>
+              <div
+                id="dropdownMenu"
+                class="absolute left-0 mt-3 w-44 bg-white border border-gray-200 rounded-md shadow-lg hidden z-50"
+              ></div>
+            </div>
+          </nav>
+
+          <div class="flex items-center gap-6 text-black">
+            <form action="../search.html" method="GET" class="relative hidden md:block">
+              <input
+                type="text"
+                name="keyword"
+                placeholder="Tìm kiếm"
+                class="w-72 border border-gray-300 rounded-full pl-12 pr-5 py-2.5 text-base focus:outline-none focus:border-black transition"
+                required
+              />
+              <button type="submit" class="absolute left-4 top-1/2 -translate-y-1/2">
+                <i class="fa-solid fa-magnifying-glass text-gray-500 text-sm hover:text-black transition"></i>
+              </button>
+            </form>
+            <a href="./login.html" class="hover:opacity-70 transition"
+              ><i class="fa-regular fa-user"></i
+            ></a>
+            <a href="../cart.html" class="relative hover:opacity-70 transition">
+              <i class="fa-solid fa-cart-shopping"></i>
+              <span
+                id="cartBadgeCount"
+                class="absolute -top-2 -right-2 bg-black text-white text-xs w-4 h-4 rounded-full flex items-center justify-center hidden"
+              >
+                0
+              </span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="bg-[#f5f5f5] py-2 px-6 border-b border-gray-100">
+      <div class="container mx-auto text-sm">
+        <a
+          href="../index.html"
+          class="text-gray-600 hover:text-black transition"
+        >
+          <i class="fa fa-home mr-1"></i> Trang chủ
+        </a>
+        <span class="mx-2 text-gray-400">/</span>
+        <span class="font-bold text-black uppercase">Tài khoản</span>
+      </div>
+    </div>
+
+    <section
+      class="relative h-[280px] w-full flex items-center justify-center overflow-hidden"
+    >
+      <img
+        src="../../image/t-shirt.jpg"
+        class="absolute inset-0 w-full h-full object-cover"
+        alt="Banner"
+      />
+      <div class="absolute inset-0 bg-black/40 z-[1]"></div>
+      <h2
+        class="relative z-10 text-white text-3xl font-bold uppercase tracking-[0.3em]"
+      >
+        Tài khoản
+      </h2>
+    </section>
+
+    <div class="container mx-auto px-4 py-16">
+      <main class="max-w-md mx-auto">
+        <section class="bg-white px-2">
+          <div class="text-center mb-10">
+            <h1 class="text-xl font-bold text-black uppercase tracking-widest">
+              Thông tin đăng nhập
+            </h1>
+          </div>
+
+          <form id="loginForm" class="space-y-6">
+            <div>
+              <input
+                type="email"
+                id="email"
+                placeholder="Email"
+                class="w-full px-0 py-3 border-b border-gray-300 focus:border-black outline-none transition-all placeholder:text-gray-400"
+              />
+            </div>
+
+            <div>
+              <input
+                type="password"
+                id="password"
+                placeholder="Mật khẩu"
+                class="w-full px-0 py-3 border-b border-gray-300 focus:border-black outline-none transition-all placeholder:text-gray-400"
+              />
+            </div>
+
+            <div class="pt-4">
+              <button
+                type="submit"
+                class="w-full bg-black text-white py-3 font-bold uppercase tracking-widest hover:bg-gray-800 transition-all text-sm"
+              >
+                Đăng nhập
+              </button>
+            </div>
+
+            <div
+              class="flex flex-col items-center gap-4 pt-4 text-sm text-gray-600"
+            >
+              <a href="../index.html" class="hover:text-black transition">
+                Quay lại cửa hàng
+              </a>
+              <a
+                href="./register.html"
+                class="hover:text-black transition font-medium"
+              >
+                Tạo tài khoản
+              </a>
+            </div>
+          </form>
+        </section>
+      </main>
+    </div>
+    <footer class="border-t border-black bg-white">
+      <p class="text-center text-base p-4">Thuộc quyền sở hửu bởi DCT123C1!</p>
+    </footer>
+    <script type="module" src="./login.js"></script>
+  </body>
+</html>
