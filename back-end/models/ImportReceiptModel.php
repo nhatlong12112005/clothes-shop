@@ -35,13 +35,15 @@ class ImportReceiptModel
 
             $this->conn->commit();
             return [
-                "status"     => true,
-                "message"    => "Tạo phiếu nhập nháp thành công",
+                "status" => true,
+                "message" => "Tạo phiếu nhập nháp thành công",
                 "receipt_id" => $receiptId
             ];
         }
         catch (Exception $e) {
-            $this->conn->rollBack();
+            if ($this->conn->inTransaction()) {
+                $this->conn->rollBack();
+            }
             return ["status" => false, "message" => $e->getMessage()];
         }
     }
@@ -87,7 +89,9 @@ class ImportReceiptModel
             return ["status" => true, "message" => "Cập nhật phiếu nhập thành công"];
         }
         catch (Exception $e) {
-            $this->conn->rollBack();
+            if ($this->conn->inTransaction()) {
+                $this->conn->rollBack();
+            }
             return ["status" => false, "message" => $e->getMessage()];
         }
     }
@@ -117,7 +121,9 @@ class ImportReceiptModel
             $items = $stmtItems->fetchAll(PDO::FETCH_ASSOC);
 
             if (empty($items)) {
-                $this->conn->rollBack();
+                if ($this->conn->inTransaction()) {
+                    $this->conn->rollBack();
+                }
                 return ["status" => false, "message" => "Phiếu nhập không có hàng nào"];
             }
 
@@ -127,13 +133,67 @@ class ImportReceiptModel
                          VALUES (?, ?, ?, ?, ?)";
             $stmtBatch = $this->conn->prepare($sqlBatch);
 
+            $stmtGetVariantInfo = $this->conn->prepare("
+                SELECT current_import_price 
+                FROM productvariants 
+                WHERE id = ? FOR UPDATE
+            ");
+
+            $stmtGetStock = $this->conn->prepare("
+                SELECT COALESCE(SUM(quantity_remaining), 0) as current_stock
+                FROM batchdetails 
+                WHERE variant_id = ?
+            ");
+
+            $stmtUpdatePrice = $this->conn->prepare("
+                UPDATE productvariants 
+                SET current_import_price = ? 
+                WHERE id = ?
+            ");
+
+            $stmtLog = $this->conn->prepare("
+                INSERT INTO inventory_logs (variant_id, change_qty, type, reference_id)
+                VALUES (?, ?, 'import', ?)
+            ");
+
             foreach ($items as $item) {
+                // Lấy giá vốn hiện tại
+                $stmtGetVariantInfo->execute([$item['variant_id']]);
+                $variantInfo = $stmtGetVariantInfo->fetch(PDO::FETCH_ASSOC);
+                $currentImportPrice = $variantInfo ? (float)$variantInfo['current_import_price'] : 0.0;
+
+                // Lấy số lượng tồn kho hiện tại
+                $stmtGetStock->execute([$item['variant_id']]);
+                $currentStock = (int)$stmtGetStock->fetchColumn();
+
+                $importQty = (int)$item['quantity'];
+                $importPrice = (float)$item['import_price'];
+
+                // Tính Giá Vốn Bình Quân (Weighted Average Price)
+                $newStockQty = $currentStock + $importQty;
+                $newAveragePrice = 0;
+                
+                if ($newStockQty > 0) {
+                    $newAveragePrice = (($currentStock * $currentImportPrice) + ($importQty * $importPrice)) / $newStockQty;
+                }
+
+                // Cập nhật giá vốn mới vào biến thể
+                $stmtUpdatePrice->execute([$newAveragePrice, $item['variant_id']]);
+
+                // Thêm vào lô hàng (batchdetails)
                 $stmtBatch->execute([
                     $receiptId,
                     $item['variant_id'],
                     $item['import_price'],
-                    $item['quantity'],
-                    $item['quantity'],
+                    $importQty,
+                    $importQty,
+                ]);
+
+                // Ghi log nhập kho
+                $stmtLog->execute([
+                    $item['variant_id'],
+                    $importQty,
+                    $receiptId
                 ]);
             }
 
@@ -145,7 +205,9 @@ class ImportReceiptModel
             return ["status" => true, "message" => "Phiếu nhập đã hoàn thành. Kho đã được cập nhật."];
         }
         catch (Exception $e) {
-            $this->conn->rollBack();
+            if ($this->conn->inTransaction()) {
+                $this->conn->rollBack();
+            }
             return ["status" => false, "message" => $e->getMessage()];
         }
     }
@@ -155,15 +217,6 @@ class ImportReceiptModel
      */
     private function _insertReceiptItems($receiptId, $items)
     {
-        // Đảm bảo bảng tồn tại
-        $this->conn->exec("CREATE TABLE IF NOT EXISTS receipt_items (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            receipt_id INT NOT NULL,
-            variant_id INT NOT NULL,
-            import_price DECIMAL(15,2) NOT NULL,
-            quantity INT NOT NULL,
-            FOREIGN KEY (receipt_id) REFERENCES importreceipts(id) ON DELETE CASCADE
-        )");
 
         $sql = "INSERT INTO receipt_items (receipt_id, variant_id, import_price, quantity) VALUES (?, ?, ?, ?)";
         $stmt = $this->conn->prepare($sql);

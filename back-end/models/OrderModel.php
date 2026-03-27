@@ -18,7 +18,7 @@ class OrderModel
                1️⃣ LẤY GIỎ HÀNG VÀ TỶ SUẤT LỢI NHUẬN (PROFIT_RATE)
             ============================== */
             $stmt = $this->conn->prepare("
-                SELECT ci.*, pi.product_id, p.profit_rate, p.proposed_price
+                SELECT ci.*, pi.product_id, p.profit_rate, pv.current_import_price
                 FROM cart_items ci
                 JOIN carts c ON c.id = ci.cart_id
                 JOIN productvariants pv ON pv.id = ci.variant_id
@@ -40,6 +40,7 @@ class OrderModel
                 $shippingName    = $shippingInfo['name'] ?? '';
                 $shippingPhone   = $shippingInfo['phone'] ?? '';
                 $shippingAddress = $shippingInfo['address'] ?? '';
+                $shippingWard    = $shippingInfo['ward'] ?? '';
             } else {
                 $userStmt = $this->conn->prepare("SELECT username, phone, address FROM users WHERE id = ?");
                 $userStmt->execute([$userId]);
@@ -58,20 +59,26 @@ class OrderModel
                3️⃣ TẠO ORDER
             ============================== */
             $stmt = $this->conn->prepare("
-                INSERT INTO orders (user_id, total_price, status, shipping_name, shipping_phone, shipping_address, payment_method)
-                VALUES (?, 0, 'pending', ?, ?, ?, ?)
+                INSERT INTO orders (user_id, total_price, status, shipping_name, shipping_phone, shipping_address, shipping_ward, payment_method)
+                VALUES (?, 0, 'pending', ?, ?, ?, ?, ?)
             ");
-            $stmt->execute([$userId, $shippingName, $shippingPhone, $shippingAddress, $paymentMethod]);
+            $stmt->execute([$userId, $shippingName, $shippingPhone, $shippingAddress, $shippingWard, $paymentMethod]);
             $orderId = $this->conn->lastInsertId();
             $total = 0;
 
             /* ==============================
                4️⃣ XỬ LÝ TỪNG ITEM (FIFO + CHẶN RACE CONDITION)
             ============================== */
+            $logStmt = $this->conn->prepare("
+                INSERT INTO inventory_logs (variant_id, change_qty, type, reference_id)
+                VALUES (?, ?, 'export', ?)
+            ");
+
             foreach ($items as $item) {
                 $remaining = $item['quantity'];
                 $profitRate = isset($item['profit_rate']) ? (float)$item['profit_rate'] : 0; // Lấy tỷ suất lợi nhuận
-                $proposedPrice = isset($item['proposed_price']) ? (float)$item['proposed_price'] : 0; // Lấy giá đề xuất
+                $currentImportPrice = isset($item['current_import_price']) ? (float)$item['current_import_price'] : 0;
+                $sellPrice = round($currentImportPrice * (1 + $profitRate / 100));
 
                 // THÊM 'FOR UPDATE' ĐỂ KHÓA DÒNG KHI CÓ NGƯỜI ĐANG MUA
                 $batchStmt = $this->conn->prepare("
@@ -90,10 +97,6 @@ class OrderModel
 
                     $take = min($remaining, $batch['quantity_remaining']);
 
-                    // Tính giá bán theo FIFO lô hiện tại
-                    $calculatedPrice = $batch['import_price'] * (1 + $profitRate / 100);
-                    $sellPrice = max($calculatedPrice, $proposedPrice);
-
                     // Tạo orderdetail với giá bán
                     $detailStmt = $this->conn->prepare("
                         INSERT INTO orderdetails (order_id, variant_id, batch_id, quantity, price_at_purchase)
@@ -108,6 +111,9 @@ class OrderModel
                         WHERE id = ?
                     ");
                     $update->execute([$take, $batch['id']]);
+
+                    // Ghi log xuất kho
+                    $logStmt->execute([$item['variant_id'], -$take, $orderId]);
 
                     $total += $take * $sellPrice; // Cộng tổng tiền bằng giá bán
                     $remaining -= $take;
@@ -175,12 +181,17 @@ class OrderModel
 private function restoreStock($orderId)
 {
     $stmt = $this->conn->prepare("
-        SELECT batch_id, quantity 
+        SELECT variant_id, batch_id, quantity 
         FROM orderdetails
         WHERE order_id = ?
     ");
     $stmt->execute([$orderId]);
     $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $logStmt = $this->conn->prepare("
+        INSERT INTO inventory_logs (variant_id, change_qty, type, reference_id)
+        VALUES (?, ?, 'adjustment', ?)
+    ");
 
     foreach ($items as $item) {
         $update = $this->conn->prepare("
@@ -189,6 +200,9 @@ private function restoreStock($orderId)
             WHERE id = ?
         ");
         $update->execute([$item['quantity'], $item['batch_id']]);
+
+        // Ghi log hoàn kho
+        $logStmt->execute([$item['variant_id'], $item['quantity'], $orderId]);
     }
 }
 public function getOrderDetail($orderId)
@@ -264,7 +278,7 @@ public function getOrders($filters = [])
         FROM orders o
         JOIN users u ON u.id = o.user_id
         $whereSql
-        ORDER BY o.id DESC
+        ORDER BY o.shipping_ward ASC, o.id DESC
         LIMIT $limit OFFSET $offset
     ";
 

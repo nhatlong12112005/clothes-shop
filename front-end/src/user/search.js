@@ -6,8 +6,10 @@ import { startCategorySync } from '../utils/sync.js';
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Phân tích URL để lấy từ khóa tìm kiếm và trang
     const urlParams = new URLSearchParams(window.location.search);
-    const query = urlParams.get('keyword');
+    const query = urlParams.get('keyword') || '';
     const page = parseInt(urlParams.get('page')) || 1;
+    const minPrice = urlParams.get('min_price') || '';
+    const maxPrice = urlParams.get('max_price') || '';
     const limit = 4; // Giảm xuống 4 sản phẩm/trang để dễ thấy phân trang hơn
     
     const keywordEl = document.getElementById('searchKeyword');
@@ -40,7 +42,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // 2. Gọi API Custom để bắt Pagination metadata
     try {
-        const params = `keyword=${encodeURIComponent(query)}&page=${page}&limit=${limit}`;
+        let params = `keyword=${encodeURIComponent(query)}&page=${page}&limit=${limit}`;
+        if (minPrice) params += `&min_price=${encodeURIComponent(minPrice)}`;
+        if (maxPrice) params += `&max_price=${encodeURIComponent(maxPrice)}`;
+        
         const res = await getProducts(params);
         
         const products = res?.data || [];
@@ -62,7 +67,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             renderProduct(products, "searchResults");
             
             // Render Pagination Buttons
-            renderPagination(pagination.total_pages, pagination.current_page, query);
+            renderPagination(pagination.total_pages, pagination.current_page, query, minPrice, maxPrice);
         }
     } catch (error) {
         console.error("Lỗi khi tìm kiếm:", error);
@@ -72,17 +77,35 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>
         `;
     }
+
+    // Xử lý Lọc giá
+    if (minPrice) document.getElementById('minPrice').value = minPrice;
+    if (maxPrice) document.getElementById('maxPrice').value = maxPrice;
+
+    document.getElementById('priceFilterForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const minP = document.getElementById('minPrice').value;
+        const maxP = document.getElementById('maxPrice').value;
+        let url = `./search.html?keyword=${encodeURIComponent(query)}`;
+        if (minP) url += `&min_price=${minP}`;
+        if (maxP) url += `&max_price=${maxP}`;
+        window.location.href = url;
+    });
 });
 
-function renderPagination(totalPages, currentPage, keyword) {
+function renderPagination(totalPages, currentPage, keyword, minPrice, maxPrice) {
     const container = document.getElementById('paginationContainer');
     container.innerHTML = '';
     
     // Xóa dòng if (totalPages <= 1) return; để nút [1] luôn hiện cho mượt mắt
     
     for (let i = 1; i <= totalPages; i++) {
+        let url = `./search.html?keyword=${encodeURIComponent(keyword)}&page=${i}`;
+        if (minPrice) url += `&min_price=${encodeURIComponent(minPrice)}`;
+        if (maxPrice) url += `&max_price=${encodeURIComponent(maxPrice)}`;
+
         const btn = document.createElement('a');
-        btn.href = `./search.html?keyword=${encodeURIComponent(keyword)}&page=${i}`;
+        btn.href = url;
         btn.textContent = i;
         btn.className = `w-10 h-10 flex items-center justify-center rounded transition-colors ${
             i === currentPage 

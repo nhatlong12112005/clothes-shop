@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 require_once "../../config/cors.php";
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: *");
@@ -13,7 +13,9 @@ $data = json_decode(file_get_contents("php://input"), true);
 if (
     empty($data['username']) ||
     empty($data['email']) ||
-    empty($data['password'])
+    empty($data['password']) ||
+    empty(trim($data['address'])) ||
+    empty(trim($data['phone']))
 ) {
     http_response_code(400);
     echo json_encode([

@@ -23,13 +23,13 @@ if ($result === "Order created") {
     $stmt->execute([$data['user_id']]);
     $orderId = $stmt->fetchColumn();
     echo json_encode([
-        "status"   => true,
-        "message"  => $result,
+        "status" => true,
+        "message" => $result,
         "order_id" => (int)$orderId
     ]);
 } else {
     echo json_encode([
-        "status"  => false,
+        "status" => false,
         "message" => $result
     ]);
 }

@@ -89,7 +89,8 @@ class CartModel
 {
     $stmt = $this->conn->prepare("
         SELECT ci.id, ci.variant_id, ci.quantity, pi.product_id,
-               pi.color, pv.size, p.name AS product_name, p.profit_rate, p.proposed_price, p.status AS product_status, pi.image_url as image,
+               pi.color, pv.size, p.name AS product_name, p.profit_rate, p.status AS product_status, pi.image_url as image,
+               pv.current_import_price,
                (
                    SELECT COALESCE(SUM(bd.quantity_remaining), 0)
                    FROM batchdetails bd
@@ -106,41 +107,21 @@ class CartModel
     $items = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($items as &$item) {
-        // Lấy tất cả các lô còn hàng của variant này
-        $batchStmt = $this->conn->prepare("
-            SELECT import_price, quantity_remaining 
-            FROM batchdetails 
-            WHERE variant_id = ? AND quantity_remaining > 0 
-            ORDER BY created_at ASC
-        ");
-        $batchStmt->execute([$item['variant_id']]);
-        $batches = $batchStmt->fetchAll(PDO::FETCH_ASSOC);
+        if ($item['product_status'] == 1 && $item['stock'] > 0) {
+            $profitRate = isset($item['profit_rate']) ? (float)$item['profit_rate'] : 0;
+            $currentImportPrice = isset($item['current_import_price']) ? (float)$item['current_import_price'] : 0;
+            
+            $sellPrice = round($currentImportPrice * (1 + $profitRate / 100));
 
-        if (!empty($batches) && $item['product_status'] == 1) {
-            $totalEstPrice = 0;
-            $remainingToCalc = $item['quantity'];
-
-            foreach ($batches as $batch) {
-                if ($remainingToCalc <= 0) break;
-                $take = min($remainingToCalc, $batch['quantity_remaining']);
-                $profitRate = isset($item['profit_rate']) ? (float)$item['profit_rate'] : 0;
-                $proposedPrice = isset($item['proposed_price']) ? (float)$item['proposed_price'] : 0;
-                
-                $calculatedPrice = $batch['import_price'] * (1 + $profitRate / 100);
-                $sellPrice = max($calculatedPrice, $proposedPrice);
-                $totalEstPrice += $take * $sellPrice;
-                $remainingToCalc -= $take;
-            }
-
-            $item['total_price'] = $totalEstPrice;
-            $item['unit_price'] = $totalEstPrice / $item['quantity']; // Giá trung bình dự kiến
-            $item['is_available'] = ($remainingToCalc == 0); // Có đủ hàng cho số lượng yêu cầu không
+            $item['unit_price'] = $sellPrice;
+            $item['total_price'] = $sellPrice * $item['quantity'];
+            $item['is_available'] = ($item['quantity'] <= $item['stock']);
         } else {
             $item['total_price'] = 0;
             $item['unit_price'] = 0;
             $item['is_available'] = false;
         }
-        unset($item['profit_rate'], $item['proposed_price'], $item['product_status']);
+        unset($item['profit_rate'], $item['current_import_price'], $item['product_status']);
     }
     return $items;
 }

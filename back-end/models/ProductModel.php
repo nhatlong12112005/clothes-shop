@@ -212,12 +212,56 @@ class ProductModel
      =============================== */
     public function deleteProduct($id)
     {
-        // Luôn xóa mềm (status = 0) để không làm vỡ dữ liệu lịch sử đơn hàng/giỏ hàng
-        $stmt = $this->conn->prepare("
-            UPDATE products SET status = 0 WHERE id = ?
-        ");
-        $stmt->execute([$id]);
-        return "hidden";
+        try {
+            $this->conn->beginTransaction();
+
+            // Kiểm tra xem sản phẩm đã từng được nhập hàng (có lô hàng nào chưa)
+            $checkStmt = $this->conn->prepare("
+                SELECT COUNT(bd.id) 
+                FROM batchdetails bd
+                JOIN productvariants pv ON pv.id = bd.variant_id
+                JOIN product_images pi ON pi.id = pv.image_id
+                WHERE pi.product_id = ?
+            ");
+            $checkStmt->execute([$id]);
+            $importCount = (int)$checkStmt->fetchColumn();
+
+            if ($importCount > 0) {
+                // Đã có lịch sử nhập hàng => XÓA MỀM (Ẩn đi)
+                $stmt = $this->conn->prepare("UPDATE products SET status = 0 WHERE id = ?");
+                $stmt->execute([$id]);
+                $this->conn->commit();
+                return "hidden";
+            } else {
+                // Chưa nhập hàng => XÓA CỨNG
+                // 1. Lấy danh sách image_id để xóa variant
+                $imgStmt = $this->conn->prepare("SELECT id FROM product_images WHERE product_id = ?");
+                $imgStmt->execute([$id]);
+                $imageIds = $imgStmt->fetchAll(PDO::FETCH_COLUMN);
+
+                if (!empty($imageIds)) {
+                    $placeholders = implode(',', array_fill(0, count($imageIds), '?'));
+                    $delVariantsStmt = $this->conn->prepare("DELETE FROM productvariants WHERE image_id IN ($placeholders)");
+                    $delVariantsStmt->execute($imageIds);
+                }
+
+                // 2. Xóa Images
+                $delImagesStmt = $this->conn->prepare("DELETE FROM product_images WHERE product_id = ?");
+                $delImagesStmt->execute([$id]);
+
+                // 3. Xóa Product
+                $delProductStmt = $this->conn->prepare("DELETE FROM products WHERE id = ?");
+                $delProductStmt->execute([$id]);
+
+                $this->conn->commit();
+                return "deleted";
+            }
+        } catch (Exception $e) {
+            if ($this->conn->inTransaction()) {
+                $this->conn->rollBack();
+            }
+            return "error";
+        }
     }
 
     /* ===============================
@@ -246,6 +290,24 @@ class ProductModel
             $params[] = "%" . $filters['keyword'] . "%";
         }
 
+        // Giá Bán = Giá Vốn Bình Quân * (1 + Tỷ Lệ Lợi Nhuận / 100)
+        $minPriceSubQuery = "(
+            SELECT MIN(pv.current_import_price * (1 + COALESCE(p.profit_rate, 0) / 100))
+            FROM productvariants pv 
+            JOIN product_images pin ON pin.id = pv.image_id 
+            WHERE pin.product_id = p.id AND pv.status = 1
+        )";
+
+        if (!empty($filters['min_price'])) {
+            $where[] = "$minPriceSubQuery >= ?";
+            $params[] = (float)$filters['min_price'];
+        }
+        
+        if (!empty($filters['max_price'])) {
+            $where[] = "$minPriceSubQuery <= ?";
+            $params[] = (float)$filters['max_price'];
+        }
+
         $whereSql = "WHERE " . implode(" AND ", $where);
 
         $page = !empty($filters['page']) ? (int)$filters['page'] : 1;
@@ -265,15 +327,12 @@ class ProductModel
                        pi.image_url AS image,
                        COALESCE(
                            (
-                               SELECT GREATEST((bd.import_price * (1 + COALESCE(p.profit_rate, 0) / 100)), COALESCE(p.proposed_price, 0))
-                               FROM batchdetails bd
-                               JOIN productvariants pv ON pv.id = bd.variant_id
+                               SELECT MIN(pv.current_import_price * (1 + COALESCE(p.profit_rate, 0) / 100))
+                               FROM productvariants pv
                                JOIN product_images pin ON pin.id = pv.image_id
-                               WHERE pin.product_id = p.id AND bd.quantity_remaining > 0
-                               ORDER BY bd.created_at ASC
-                               LIMIT 1
+                               WHERE pin.product_id = p.id AND pv.status = 1
                            ),
-                           (COALESCE(p.proposed_price, 0) + 0)
+                           0
                        ) AS min_price,
                        (
                            SELECT COALESCE(SUM(od.quantity), 0)
@@ -332,15 +391,12 @@ class ProductModel
                    b.name AS brand_name,
                    COALESCE(
                        (
-                           SELECT GREATEST((bd.import_price * (1 + COALESCE(p.profit_rate, 0) / 100)), COALESCE(p.proposed_price, 0))
-                           FROM batchdetails bd
-                           JOIN productvariants pv ON pv.id = bd.variant_id
+                           SELECT MIN(pv.current_import_price * (1 + COALESCE(p.profit_rate, 0) / 100))
+                           FROM productvariants pv
                            JOIN product_images pin ON pin.id = pv.image_id
-                           WHERE pin.product_id = p.id AND bd.quantity_remaining > 0
-                           ORDER BY bd.created_at ASC
-                           LIMIT 1
+                           WHERE pin.product_id = p.id AND pv.status = 1
                        ),
-                       (COALESCE(p.proposed_price, 0) + 0)
+                       0
                    ) AS min_price,
                    (
                        SELECT COALESCE(SUM(od.quantity), 0)
@@ -383,17 +439,8 @@ class ProductModel
         // 3. Lấy biến thể (Size) theo từng nhóm màu
         foreach ($colors as &$colorRow) {
             $stmtVar = $this->conn->prepare("
-                SELECT pv.id, pv.size, pv.status,
-                       COALESCE(
-                           (
-                               SELECT GREATEST((bd.import_price * (1 + COALESCE(?, 0) / 100)), COALESCE(?, 0))
-                               FROM batchdetails bd
-                               WHERE bd.variant_id = pv.id AND bd.quantity_remaining > 0
-                               ORDER BY bd.created_at ASC
-                               LIMIT 1
-                           ),
-                           (COALESCE(?, 0) + 0)
-                       ) AS price,
+                SELECT pv.id, pv.size, pv.status, pv.current_import_price,
+                       (pv.current_import_price * (1 + COALESCE(?, 0) / 100)) AS price,
                        (
                            SELECT COALESCE(SUM(bd.quantity_remaining), 0)
                            FROM batchdetails bd
@@ -403,7 +450,7 @@ class ProductModel
                 WHERE pv.image_id = ? AND pv.status = 1 
                 ORDER BY pv.id ASC
             ");
-            $stmtVar->execute([$product['profit_rate'], $product['proposed_price'], $product['proposed_price'], $colorRow['image_id']]);
+            $stmtVar->execute([$product['profit_rate'], $colorRow['image_id']]);
             $colorRow['sizes'] = $stmtVar->fetchAll(PDO::FETCH_ASSOC);
         }
 

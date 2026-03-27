@@ -21,10 +21,7 @@ $sql = "SELECT
     bd.created_at AS batch_date,
     COALESCE(p.profit_rate, 0) AS profit_rate,
     COALESCE(p.proposed_price, 0) AS proposed_price,
-    GREATEST(
-        ROUND(bd.import_price * (1 + COALESCE(p.profit_rate, 0) / 100)),
-        COALESCE(p.proposed_price, 0)
-    ) AS sell_price
+    ROUND(pv.current_import_price * (1 + COALESCE(p.profit_rate, 0) / 100)) AS sell_price
 FROM batchdetails bd
 JOIN productvariants pv ON pv.id = bd.variant_id
 JOIN product_images pi ON pi.id = pv.image_id
