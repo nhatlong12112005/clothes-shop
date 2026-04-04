@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       alert("Đăng ký thành công! Vui lòng đăng nhập");
       window.location.href = "login.html";
     } else {
-      alert(result.status || "Đăng ký thất bại");
+      alert(result.message || "Đăng ký thất bại");
     }
   });
 }

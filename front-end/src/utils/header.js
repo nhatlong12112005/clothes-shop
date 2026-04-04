@@ -1,22 +1,16 @@
+import { authUtils } from './auth.js';
+
 const user = JSON.parse(localStorage.getItem("user_info"));
 
 const usernameEl = document.getElementById("username");
 const userBtn = document.getElementById("userBtn");
 const userMenu = document.getElementById("userMenu");
-const adminLink = document.getElementById("adminLink");
-
 const dropdownBtn = document.getElementById("dropdownBtn");
 const dropdownMenu = document.getElementById("dropdownMenu");
 
 if (user && userBtn && usernameEl) {
   // hiển thị tên user
   usernameEl.textContent = user.username || user.email;
-
-  // hiện admin
-  if (user.role === "admin" && adminLink) {
-    adminLink.classList.remove("hidden");
-  }
-
   // mở dropdown User
   userBtn.addEventListener("click", (e) => {
     e.stopPropagation();
@@ -56,14 +50,12 @@ document.addEventListener("click", (e) => {
   }
 });
 
-// logout
+// logout - dùng authUtils để nhất quán với hệ thống auth
 window.logout = function () {
-  localStorage.removeItem("user_info");
-  localStorage.removeItem("token");
-  window.location.href = "/clothes-shop/front-end/src/user/account/login.html";
+  authUtils.logout();
 };
 
-// Cập nhật số lượng giỏ hàng trên Header (Gọi sau này)
+// Cập nhật số lượng giỏ hàng trên Header
 export function updateCartBadge(count) {
   const badge = document.getElementById("cartBadgeCount");
   if(badge) {
@@ -72,7 +64,7 @@ export function updateCartBadge(count) {
   }
 }
 
-// Auto-fetch cart logic on page load
+// Auto-fetch cart count on page load
 if (user && (user.id || user.user_id)) {
   const checkCartCount = async () => {
     try {
@@ -94,4 +86,3 @@ if (user && (user.id || user.user_id)) {
   };
   checkCartCount();
 }
-

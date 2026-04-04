@@ -140,7 +140,7 @@ async function handlePlaceOrder(e) {
     if (res.status) {
       window.location.href = `./order_success.html?order_id=${res.order_id || ''}`;
     } else {
-      alert("Lỗi tạo đơn: " + (res.message || "Kiểm tra số lượng tồn kho"));
+      alert(res.message || "Đặt hàng không thành công. Vui lòng kiểm tra lại giỏ hàng.");
     }
   } catch(err) {
     console.error("Lỗi đặt hàng", err);

@@ -1,4 +1,5 @@
 export const BASE_URL = 'http://localhost/projectPhp/clothes-shop/back-end/api';
+import { authUtils } from '../utils/auth.js';
 
 /**
  * Hàm chung để gọi API với Fetch
@@ -9,8 +10,8 @@ export const BASE_URL = 'http://localhost/projectPhp/clothes-shop/back-end/api';
 export async function fetchAPI(endpoint, options = {}) {
   const url = `${BASE_URL}${endpoint}`;
   
-  // Lấy token từ localStorage
-  const token = localStorage.getItem('token') || '';
+  // Lấy token từ localStorage (qua authUtils để tự nhận diện admin hay user)
+  const token = authUtils.getToken() || '';
 
   // Header mặc định (nếu không có)
   const headers = {
@@ -28,8 +29,8 @@ export async function fetchAPI(endpoint, options = {}) {
     if (!response.ok) {
       if (response.status === 401 && window.location.pathname !== '/login.html') {
           // Xử lý tự động out ra nếu hết hạn Token
-          localStorage.removeItem('token');
-          localStorage.removeItem('user_info');
+          localStorage.removeItem(authUtils.getTokenKey());
+          localStorage.removeItem(authUtils.getUserKey());
           alert("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
           window.location.href = '/clothes-shop/front-end/src/user/account/login.html';
       }

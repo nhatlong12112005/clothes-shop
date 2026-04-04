@@ -184,6 +184,11 @@ function updatePriceAndCartState() {
       btn.disabled = false;
       btn.innerHTML = 'Thêm vào giỏ';
       stockDisplay.textContent = `Tồn kho: ${variantStock}`;
+      const qtyInput = document.getElementById("qtyInput");
+      if (qtyInput) {
+        let currentQty = parseInt(qtyInput.value) || 1;
+        if (currentQty > variantStock) qtyInput.value = variantStock;
+      }
     } else {
       btn.disabled = true;
       btn.innerHTML = 'Hết hàng';
@@ -211,12 +216,23 @@ function bindEvents() {
 
   btnPlus.addEventListener("click", () => {
     let val = parseInt(qtyInput.value) || 1;
-    qtyInput.value = val + 1;
+    let max = selectedSizeObj ? parseInt(selectedSizeObj.stock) : Number.MAX_SAFE_INTEGER;
+    if (val < max) {
+      qtyInput.value = val + 1;
+    } else if (selectedSizeObj) {
+      alert(`Chỉ còn ${max} sản phẩm trong kho`);
+    }
   });
 
   qtyInput.addEventListener('change', () => {
     let val = parseInt(qtyInput.value);
-    if (isNaN(val) || val < 1) qtyInput.value = 1;
+    if (isNaN(val) || val < 1) val = 1;
+    let max = selectedSizeObj ? parseInt(selectedSizeObj.stock) : Number.MAX_SAFE_INTEGER;
+    if (val > max) {
+      alert(`Chỉ còn ${max} sản phẩm trong kho`);
+      val = max;
+    }
+    qtyInput.value = val;
   });
 
   // Submit giỏ hàng
@@ -235,7 +251,15 @@ function bindEvents() {
       return;
     }
 
+    const maxStock = parseInt(selectedSizeObj.stock || 0);
     const qty = parseInt(qtyInput.value) || 1;
+    
+    if (qty > maxStock) {
+      alert("Số lượng vượt quá tồn kho hiện tại (" + maxStock + ")!");
+      qtyInput.value = maxStock;
+      return;
+    }
+
     const variantId = selectedSizeObj.id;
 
     const btn = document.getElementById("btnAddToCart");

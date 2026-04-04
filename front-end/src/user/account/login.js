@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const password = document.getElementById("password").value.trim();
 
     const result = await authApi.login(email, password);
-    console.log("dữ liệu nhận được:", result);
+
 
     if (result.status) {
       // lưu user + token
@@ -26,11 +26,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       alert("Đăng nhập thành công");
 
-      if (authUtils.isAdmin()) {
-        window.location.href = "../../admin/index.html";
-      } else {
-        window.location.href = "../index.html";
-      }
+      window.location.href = "../index.html";
     } else {
       alert(result.message || "Sai email hoặc mật khẩu");
     }

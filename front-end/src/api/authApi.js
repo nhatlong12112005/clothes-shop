@@ -1,4 +1,5 @@
-const BASE_URL = "http://localhost/projectphp/clothes-shop/back-end/api";
+const BASE_URL = "http://localhost/projectPhp/clothes-shop/back-end/api";
+import { authUtils } from '../utils/auth.js';
 
 export const authApi = {
   login: async (email, password) => {
@@ -29,7 +30,7 @@ export const authApi = {
   },
   logout: async () => {
     try {
-      const token = localStorage.getItem("token");
+      const token = authUtils.getToken();
 
       const res = await fetch(`${BASE_URL}/auth/logout.php`, {
         method: "POST",

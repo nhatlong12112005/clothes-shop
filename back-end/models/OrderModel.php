@@ -15,6 +15,16 @@ class OrderModel
             $this->conn->beginTransaction();
 
             /* ==============================
+               0️⃣ KIỂM TRA TÀI KHOẢN BỊ KHÓA
+            ============================== */
+            $userCheck = $this->conn->prepare("SELECT is_active FROM users WHERE id = ?");
+            $userCheck->execute([$userId]);
+            $userRow = $userCheck->fetch(PDO::FETCH_ASSOC);
+            if (!$userRow || $userRow['is_active'] == 0) {
+                throw new Exception("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ hỗ trợ để được giúp đỡ.");
+            }
+
+            /* ==============================
                1️⃣ LẤY GIỎ HÀNG VÀ TỶ SUẤT LỢI NHUẬN (PROFIT_RATE)
             ============================== */
             $stmt = $this->conn->prepare("

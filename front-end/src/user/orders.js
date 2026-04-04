@@ -112,7 +112,7 @@ window.viewOrderDetail = async function(orderId) {
             alert("Lỗi tải chi tiết đơn hàng");
         }
     } catch(e) {
-        alert("Lỗi kết nối CSDL");
+        alert("Lỗi kết nối. Vui lòng thử lại sau.");
         console.error(e);
     }
 }

@@ -1,90 +1,83 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Trang chủ Quản trị</title>
-    <link href="../output.css" rel="stylesheet" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
-      integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
-      crossorigin="anonymous"
-      referrerpolicy="no-referrer"
-    />
-    <script type="module" src="../utils/adminGuard.js"></script>
-    <script type="module" src="./app.js"></script>
-  </head>
-  <body>
-    <header
-      class="bg-black text-white p-4 flex justify-between items-center w-full shadow-md"
-    >
-      <div class="ml-10">
-        <a href="#" data-target="trangchu" class="text-3xl font-bold tracking-widest uppercase hover:text-gray-300 transition">
-          CLOTHES SHOP
-        </a>
-      </div>
 
-      <ul class="flex items-center space-x-6 mr-10">
-        <li class="flex items-center pl-4">
-          <i class="fa-solid fa-circle-user text-2xl font-black"></i>
-          <span class="font-medium text-lg ml-2">Admin</span>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Trang chủ Quản trị</title>
+  <link href="../output.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script type="module" src="../utils/adminGuard.js"></script>
+  <script type="module" src="./app.js"></script>
+</head>
+
+<body>
+  <header class="bg-black text-white p-4 flex justify-between items-center w-full shadow-md">
+    <div class="ml-10">
+      <a href="#" data-target="trangchu"
+        class="text-3xl font-bold tracking-widest uppercase hover:text-gray-300 transition">
+        CLOTHES SHOP
+      </a>
+    </div>
+
+    <ul class="flex items-center space-x-6 mr-10">
+      <li class="flex items-center pl-4">
+        <i class="fa-solid fa-circle-user text-2xl font-black"></i>
+        <span class="font-medium text-lg ml-2">Admin</span>
+      </li>
+      <li>
+        <button onclick="window.adminLogout()" class="px-4 py-2 text-white font-medium hover:text-gray-300">
+          Đăng xuất
+        </button>
+      </li>
+    </ul>
+  </header>
+  <div class="flex w-full">
+    <!-- Sidebar -->
+    <nav class="w-1/5 bg-white p-6 shadow-md min-h-screen text-lg font-semibold">
+      <ul>
+        <li class="py-3 text-center text-primary font-bold">
+          <a href="#" data-target="trangchu">Trang chủ / Dashboard</a>
         </li>
-        <li>
-          <a href="../user/index.html" class="px-4 py-2 text-white font-medium">
-            Đăng xuất
-          </a>
+        <li class="py-3 text-center hover:text-primary">
+          <a href="#" data-target="listdm">Quản lý danh mục</a>
         </li>
-      </ul>
-    </header>
-    <div class="flex w-full">
-      <!-- Sidebar -->
-      <nav
-        class="w-1/5 bg-white p-6 shadow-md min-h-screen text-lg font-semibold"
-      >
-        <ul>
-          <li class="py-3 text-center text-primary font-bold">
-            <a href="#" data-target="trangchu">Trang chủ / Dashboard</a>
-          </li>
-          <li class="py-3 text-center hover:text-primary">
-            <a href="#" data-target="listdm">Quản lý danh mục</a>
-          </li>
-          <li class="py-3 text-center hover:text-primary">
-            <a href="#" data-target="listsp">Quản lý sản phẩm</a>
-          </li>
-          <li class="py-3 text-center hover:text-primary">
-            <a href="#" data-target="listbrand">Quản lý thương hiệu</a>
-          </li>
-          <li class="py-3 text-center hover:text-primary">
-            <a href="#" data-target="listsupplier">Quản lý NCC</a>
-          </li>
-          <li class="py-3 text-center hover:text-primary">
-            <a href="#" data-target="inventory">Quản lý tồn kho</a>
-          </li>
-          <li class="py-3 text-center hover:text-primary">
-            <a href="#" data-target="receipt">Quản lý phiếu nhập</a>
-          </li>
-          <li class="py-3 text-center hover:text-primary">
-            <a href="#" data-target="qldh">Quản lý đơn hàng</a>
-          </li>
-          <li class="py-3 text-center hover:text-primary">
-            <a href="#" data-target="qlkh">Quản lý khách hàng</a>
-          </li>
-          <li class="py-3 text-center hover:text-primary">
-            <a href="#" data-target="pricing">💰 Quản lý giá bán</a>
-          </li>
-          <!-- <li class="py-3 text-center hover:text-primary">
+        <li class="py-3 text-center hover:text-primary">
+          <a href="#" data-target="listsp">Quản lý sản phẩm</a>
+        </li>
+        <li class="py-3 text-center hover:text-primary">
+          <a href="#" data-target="listbrand">Quản lý thương hiệu</a>
+        </li>
+        <li class="py-3 text-center hover:text-primary">
+          <a href="#" data-target="listsupplier">Quản lý NCC</a>
+        </li>
+        <li class="py-3 text-center hover:text-primary">
+          <a href="#" data-target="inventory">Quản lý tồn kho</a>
+        </li>
+        <li class="py-3 text-center hover:text-primary">
+          <a href="#" data-target="receipt">Quản lý phiếu nhập</a>
+        </li>
+        <li class="py-3 text-center hover:text-primary">
+          <a href="#" data-target="qldh">Quản lý đơn hàng</a>
+        </li>
+        <li class="py-3 text-center hover:text-primary">
+          <a href="#" data-target="qlkh">Quản lý khách hàng</a>
+        </li>
+        <li class="py-3 text-center hover:text-primary">
+          <a href="#" data-target="pricing">Quản lý giá bán</a>
+        </li>
+        <!-- <li class="py-3 text-center hover:text-primary">
             <a href="#" data-target="tksp">Thống kê Sản phẩm</a>
           </li> -->
-        </ul>
-      </nav>
+      </ul>
+    </nav>
 
-      <main
-        id="main-content"
-        class="w-4/5 p-6 flex flex-col justify-start items-center text-center min-h-screen"
-      >
-        <!-- Nội dung sẽ được render bởi app.js -->
-      </main>
-    </div>
-  </body>
+    <main id="main-content" class="w-4/5 p-6 flex flex-col justify-start items-center text-center min-h-screen">
+      <!-- Nội dung sẽ được render bởi app.js -->
+    </main>
+  </div>
+</body>
+
 </html>

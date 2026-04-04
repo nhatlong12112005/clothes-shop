@@ -7,6 +7,11 @@ require_once "../../models/OrderModel.php";
 
 $data = json_decode(file_get_contents("php://input"), true);
 
+if (empty($data['user_id']) || empty($data['shipping']) || empty($data['payment_method'])) {
+    echo json_encode(["status" => false, "message" => "Thiếu dữ liệu đặt hàng"]);
+    exit;
+}
+
 $db = (new Database())->getConnection();
 $model = new OrderModel($db);
 

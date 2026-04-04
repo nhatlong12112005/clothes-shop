@@ -1,10 +1,8 @@
-﻿<?php
+<?php
 require_once "../../config/cors.php";
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: *");
 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 
 require_once "../../config/database.php";
 require_once "../../models/UserModel.php";
